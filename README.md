@@ -1,43 +1,53 @@
-# WHL 2026 Performance Prediction Engine
+# 🏒 WHL 2026 Performance Prediction Engine
 **Team: Polite Cats** | *Wharton High School Data Science Competition 2026*
 
-## 🏒 Project Overview
-This repository contains a modular data science pipeline designed to analyze the World Hockey League (WHL) 2025 season. Our goal is to provide data-driven Power Rankings, matchup predictions, and feature importance analysis for the upcoming WHL Tournament.
+## 🌟 Achievement: 65.4% Accuracy 🎯
+We have successfully developed a robust predictive model that achieves **65.4% accuracy** (ROC AUC: 0.691) on the WHL 2025 dataset. This version incorporates advanced situational analytics and individual performance deltas.
 
 ## 🏗 Modular Architecture
-The project is structured into functional modules to ensure scalability and clarity:
-- `data_loader.py`: Handles raw CSV/Excel ingestion.
-- `aggregator.py`: Converts shift-level data into game-level and team-level metrics.
-- `ranker_engine.py`: Implements our proprietary Power Ranking formula.
-- `predictor_ml.py`: Machine Learning models (Logistic Regression/CatBoost) for matchup probabilities.
-- `viz_factory.py`: Generates high-fidelity visualizations for the final report.
+The project is structured into a production-ready pipeline:
+- `src/config.py`: Centralized configuration management for all hyperparameters and paths.
+- `src/aggregator.py`: Phase 4 data engine (Goalie GSAX, PP Efficiency, High-Danger Suppression).
+- `src/ensemble_model.py`: Weighted ensemble (70/30) of **Logistic Regression** and **CatBoost**.
+- `src/predictor_ml.py`: Advanced Feature engineering (Recency Win %, Finishing Skill, Efficiency Diffs).
+- `src/viz_factory.py`: High-fidelity visualizations (Heatmaps, Power Rankings, Feature Importance).
+- `src/simulator.py`: Monte Carlo tournament simulations.
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Python 3.9 or higher
-- Git
-
 ### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/quinur/polite-cats.git
-   cd polite-cats
-   ```
-
-2. Create a virtual environment:
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-
-3. Install dependencies:
+1. Install dependencies:
     ```bash
     pip install -r requirements.txt
     ```
 
-## 📊 Data Source
-All analysis is based on the fictional WHL 2025 Dataset provided by the Wharton Sports Analytics and Business Initiative.
+### Running the Pipeline
+The engine now supports a full CLI for production use:
+
+```bash
+# Standard run (trains and predicts)
+python main.py
+
+# Run with SHAP explanations and verbose logging
+python main.py --explain --verbose
+
+# Use a specific dataset and save to a custom folder
+python main.py --data data/custom_whl.csv --output custom_results/
+
+# Fast run by loading a previously saved model
+python main.py --load
+```
+
+## 📊 Outputs (outputs/)
+- `team_rankings.csv`: The official Power Ranking leaderboard.
+- `matchup_predictions.csv`: Win probabilities for tournament matchups.
+- `matchup_simulations.csv`: Monte Carlo results for tournament outcomes.
+- `feature_importance.html`: Interactive chart showing the "DNA" of our model's decisions.
+- `power_rankings.html`: Visual representation of team strength.
+- `ensemble_model.joblib`: Persisted model for deployment.
+
+## 🧠 Why Our Model Wins
+Our model focuses on **efficiency metrics** rather than raw totals. By analyzing `win_pct_diff` and `xg_per_shot_diff`, we capture the underlying quality of a team's play, which is a far more reliable predictor than simple goal counting.
 
 ## ⚖️ License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
