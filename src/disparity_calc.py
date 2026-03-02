@@ -17,11 +17,11 @@ Steps:
        - xG per 60 minutes:  ``xg60 = xg_sum / (toi_sum / 3600) * 60``
 
   3. Compute the **Disparity Metric** per team:
-       ``disparity = max(xg60) − min(xg60)``   [across that team's lines]
+       ``disparity = first_off_xg60 / second_off_xg60``
 
-     A higher value means the best line vastly outperforms the worst —
-     i.e. the team relies on 1-2 lines for all its offence.
-     We also emit the standard deviation as a secondary statistic.
+     A higher value means the first line vastly outperforms the second line —
+     i.e. the team relies heavily on its top line for offence.
+     We handle division by zero by safely falling back to NaN or computing normally.
 
   4. Output ``outputs/top10_disparity.csv``.
 """
@@ -112,10 +112,11 @@ def calculate_disparity(
         columns={"first_off": "first_off_xg60", "second_off": "second_off_xg60"}
     )
 
-    # Disparity = |best line − worst line| (gap-based metric)
-    pivot["disparity"] = (
-        pivot[["first_off_xg60", "second_off_xg60"]].max(axis=1)
-        - pivot[["first_off_xg60", "second_off_xg60"]].min(axis=1)
+    # Disparity = Ratio (First Line / Second Line xG/60)
+    pivot["disparity"] = np.where(
+        pivot["second_off_xg60"] == 0,
+        np.nan,
+        pivot["first_off_xg60"] / pivot["second_off_xg60"]
     )
     # Standard deviation as secondary metric (useful for > 2 lines)
     pivot["disparity_std"] = pivot[["first_off_xg60", "second_off_xg60"]].std(
@@ -131,7 +132,10 @@ def calculate_disparity(
     if output_path is not None:
         out = Path(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
-        top10.to_csv(out, index=False)
+        out_df = top10[["rank", "team", "disparity"]].rename(
+            columns={"rank": "Rank", "team": "Team", "disparity": "Ratio"}
+        )
+        out_df.to_csv(out, index=False)
         logger.info("💾 Saved top-10 disparity table → %s", out)
 
     return disparity_all

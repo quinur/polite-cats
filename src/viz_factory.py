@@ -100,11 +100,11 @@ def disparity_scatter_plot(
     output_path: str | Path,
     top_n: int = 10,
 ) -> str:
-    """Plot Offensive Line Disparity vs Win Percentage with a regression trendline.
+    """Plot Offensive Line Disparity vs Team Strength with a regression trendline.
 
     Args:
         disparity_df: Full disparity DataFrame from ``calculate_disparity``.
-        team_df: Team-level DataFrame (must contain ``team`` and ``win_pct``).
+        team_df: Team-level DataFrame (must contain ``team`` and ``score``).
         output_path: Path to save the PNG.
         top_n: Number of top-disparity teams to highlight and label.
 
@@ -114,12 +114,12 @@ def disparity_scatter_plot(
     import numpy as np
     import matplotlib.patches as mpatches
 
-    # ── Merge disparity with win_pct ──────────────────────────────────────
+    # ── Merge disparity with score ──────────────────────────────────────
     merged = disparity_df.merge(
-        team_df[["team", "win_pct"]].rename(columns={"win_pct": "win_pct"}),
+        team_df[["team", "score"]].rename(columns={"score": "score"}),
         on="team",
         how="inner",
-    ).dropna(subset=["disparity", "win_pct"])
+    ).dropna(subset=["disparity", "score"])
 
     if merged.empty:
         raise ValueError("No overlapping teams between disparity_df and team_df.")
@@ -138,7 +138,7 @@ def disparity_scatter_plot(
 
     # ── Regression line (OLS) ─────────────────────────────────────────────
     x = merged["disparity"].values
-    y = merged["win_pct"].values
+    y = merged["score"].values
     m, b = np.polyfit(x, y, 1)
     x_line = np.linspace(x.min() - 0.05, x.max() + 0.05, 200)
     ax.plot(
@@ -156,7 +156,7 @@ def disparity_scatter_plot(
     bg = merged[~top_mask]
     ax.scatter(
         bg["disparity"],
-        bg["win_pct"],
+        bg["score"],
         color="#4a9eff",
         alpha=0.55,
         s=70,
@@ -170,7 +170,7 @@ def disparity_scatter_plot(
     top = merged[top_mask]
     scatter_top = ax.scatter(
         top["disparity"],
-        top["win_pct"],
+        top["score"],
         c=top["disparity"],
         cmap="plasma",
         vmin=merged["disparity"].min(),
@@ -184,7 +184,7 @@ def disparity_scatter_plot(
 
     # Add a colorbar for the top-N gradient
     cbar = fig.colorbar(scatter_top, ax=ax, pad=0.02, shrink=0.75)
-    cbar.set_label("Disparity (xG60 gap)", color="#c9d1d9", fontsize=11)
+    cbar.set_label("Disparity (xG60 Ratio)", color="#c9d1d9", fontsize=11)
     cbar.ax.yaxis.set_tick_params(color="#c9d1d9")
     plt.setp(cbar.ax.yaxis.get_ticklabels(), color="#c9d1d9")
 
@@ -192,7 +192,7 @@ def disparity_scatter_plot(
     for _, row in top.iterrows():
         ax.annotate(
             row["team"].capitalize(),
-            xy=(row["disparity"], row["win_pct"]),
+            xy=(row["disparity"], row["score"]),
             xytext=(7, 4),
             textcoords="offset points",
             fontsize=8.5,
@@ -219,14 +219,18 @@ def disparity_scatter_plot(
     ax.axhline(np.median(y), color="#c9d1d9", linewidth=0.7, alpha=0.35, linestyle=":")
 
     # ── Labels, title, legend ─────────────────────────────────────────────
-    ax.set_xlabel("Offensive Line Quality Disparity  (xG/60 gap: best − worst line)",
+    ax.set_xlabel("Offensive Line Quality Ratio (1st Line / 2nd Line xG)",
                   color="#c9d1d9", fontsize=13, labelpad=12)
-    ax.set_ylabel("Team Win Percentage", color="#c9d1d9", fontsize=13, labelpad=12)
+    ax.set_ylabel("Team Strength (Bayesian Aggregate Score)", color="#c9d1d9", fontsize=13, labelpad=12)
     ax.set_title(
-        "Offensive Line Disparity vs Team Success\n"
+        "The Impact of Offensive Line Disparity on Team Strength\n"
         "WHL 2026 · Wharton High School Data Science Competition",
-        color="#e6edf3", fontsize=15, fontweight="bold", pad=18,
+        color="#e6edf3", fontsize=15, fontweight="bold", pad=28,
     )
+    
+    # ── Subtitle / Caption ────────────────────────────────────────────────
+    fig.text(0.5, 0.90, "A flat trendline indicates that heavily relying on a single top line does not guarantee higher overall team performance.", 
+             ha="center", color="#8b949e", fontsize=10, style="italic")
 
     ax.tick_params(colors="#8b949e", labelsize=10)
     for spine in ax.spines.values():

@@ -195,27 +195,27 @@ def run_headless(args: argparse.Namespace) -> None:
         top10 = disparity_all.head(10)[
             ["rank", "team", "first_off_xg60", "second_off_xg60", "disparity"]
         ].copy()
-        top10.columns = ["#", "Team", "1st Line xG/60", "2nd Line xG/60", "Disparity Gap"]
+        top10.columns = ["#", "Team", "1st Line xG/60", "2nd Line xG/60", "Ratio"]
         top10 = top10.set_index("#")
         top10["1st Line xG/60"] = top10["1st Line xG/60"].map("{:.3f}".format)
         top10["2nd Line xG/60"] = top10["2nd Line xG/60"].map("{:.3f}".format)
-        top10["Disparity Gap"]   = top10["Disparity Gap"].map("{:.3f}".format)
+        top10["Ratio"]   = top10["Ratio"].map("{:.3f}".format)
 
         print()
-        print("\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m")
-        print("\033[1;36m  📊 TOP 10 — Offensive Line Quality Disparity       \033[0m")
-        print("\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m")
+        print("---------------------------------------------------")
+        print("  TOP 10 - Offensive Line Quality Disparity")
+        print("---------------------------------------------------")
         print(top10.to_string())
-        print("\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m")
+        print("---------------------------------------------------")
         print()
 
         logger.info(f"💾 Top-10 disparity CSV → {disparity_csv}")
 
-        # Visualisation (Task 1c) — requires win_pct in team_df
+        # Visualisation (Task 1c) — requires score in ranked df
         logger.info("🎨 Generating disparity scatter plot (Task 1c)...")
         disparity_scatter_plot(
             disparity_all,
-            team_df,
+            ranked,
             output_path=disparity_png,
         )
         logger.info(f"🖼️  Disparity scatter saved → {disparity_png}")

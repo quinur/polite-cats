@@ -1,8 +1,8 @@
 # 🏒 WHL 2026 Performance Prediction Engine
 **Team: Polite Cats** | *Wharton High School Data Science Competition 2026*
 
-## 🌟 Achievement: 65.4% Accuracy 🎯
-We have successfully developed a robust predictive model that achieves **65.4% accuracy** (ROC AUC: 0.691) on the WHL 2025 dataset. This version incorporates advanced situational analytics and individual performance deltas.
+## 🌟 Achievement: 63.5% Accuracy 🎯
+We have successfully developed a robust predictive model that achieves **63.5% accuracy** (ROC AUC: 0.620) on the WHL 2025 dataset. This version incorporates advanced situational analytics and individual performance deltas.
 
 ## 🏗 Modular Architecture
 The project is structured into a production-ready pipeline:
